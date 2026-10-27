@@ -1,0 +1,9 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {validateState} from '../server/index.js';
+const base=()=>({students:[{id:'s',name:'Ali',phone:'',group:'MMA',note:''}],plans:[{id:'p',name:'Oylik',price:100000,months:1}],memberships:[],payments:[],attendance:[]});
+test('validates empty memberships',()=>assert.equal(validateState(base()),true));
+test('rejects invalid payment references',()=>{const s=base();s.payments.push({id:'a',studentId:'notfound',day:'2026-10-27',amount:1000,method:'Naqd'});assert.equal(validateState(s),false)});
+test('rejects duplicate ids',()=>{const s=base();s.students.push({...s.students[0]});assert.equal(validateState(s),false)});
+test('rejects negative plan prices',()=>{const s=base();s.plans[0].price=-1;assert.equal(validateState(s),false)});
+test('accepts valid subscription and payment',()=>{const s=base();s.memberships.push({id:'m',studentId:'s',planId:'p',start:'2026-10-27',end:'2026-11-27',price:100000});s.payments.push({id:'x',studentId:'s',day:'2026-10-27',amount:100000,method:'Naqd'});assert.equal(validateState(s),true)});
