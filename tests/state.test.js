@@ -1,6 +1,11 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {validateState} from '../server/index.js';
+process.env.NODE_ENV='test';
+process.env.DATABASE_URL ||= 'postgresql://unused:unused@localhost:5432/unused';
+process.env.ADMIN_USERNAME ||= 'admin';
+process.env.ADMIN_PASSWORD ||= 'testpassword-1234';
+process.env.SESSION_SECRET ||= 'test-only-secret-do-not-use-in-production-12345';
+const {validateState}=await import('../server/index.js');
 const base=()=>({students:[{id:'s',name:'Ali',phone:'',group:'MMA',note:''}],plans:[{id:'p',name:'Oylik',price:100000,months:1}],memberships:[],payments:[],attendance:[]});
 test('validates empty memberships',()=>assert.equal(validateState(base()),true));
 test('rejects invalid payment references',()=>{const s=base();s.payments.push({id:'a',studentId:'notfound',day:'2026-10-27',amount:1000,method:'Naqd'});assert.equal(validateState(s),false)});
