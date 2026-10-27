@@ -17,7 +17,7 @@ const app=express();
 app.disable('x-powered-by');app.set('trust proxy',Number(process.env.TRUST_PROXY||0));
 app.use(helmet({contentSecurityPolicy:{directives:{defaultSrc:["'self'"],scriptSrc:["'self'"],styleSrc:["'self'"],imgSrc:["'self'","data:"],connectSrc:["'self'"],objectSrc:["'none'"],baseUri:["'self'"],frameAncestors:["'none'"]}}}));
 app.use(express.json({limit:'2mb'}));
-const initial=()=>({students:[],plans:[{id:'p1',name:'Oylik',price:350000,months:1},{id:'p2',name:'12 mashg‘ulot',price:400000,months:1}],memberships:[],payments:[],attendance:[]});
+const initial=()=>({students:[],plans:[{id:'p1',name:'Oylik',price:350000,months:1},{id:'p2',name:'12 mashg‘ulot',price:400000,months:2,visits:12}],memberships:[],payments:[],attendance:[]});
 export function validateState(s){
  if(!s||typeof s!=='object'||Array.isArray(s))return false;
  const keys=['students','plans','memberships','payments','attendance'];
@@ -28,7 +28,7 @@ export function validateState(s){
  const money=v=>typeof v==='number'&&Number.isFinite(v)&&v>=0&&v<=1e12;
  const date=v=>str(v,10)&&/^\d{4}-\d{2}-\d{2}$/.test(v)&&!Number.isNaN(Date.parse(v));
  if(!s.students.every(x=>str(x.name,180)&&x.name.trim()&&str(x.phone??'',80)&&str(x.group??'',120)&&str(x.note??'',2000)))return false;
- if(!s.plans.every(x=>str(x.name,180)&&x.name.trim()&&money(x.price)&&Number.isInteger(x.months)&&x.months>=1&&x.months<=120))return false;
+ if(!s.plans.every(x=>str(x.name,180)&&x.name.trim()&&money(x.price)&&Number.isInteger(x.months)&&x.months>=1&&x.months<=120&&Number.isInteger(x.visits??0)&&(x.visits??0)>=0))return false;
  if(!s.memberships.every(x=>ids.has(x.studentId)&&planIds.has(x.planId)&&date(x.start)&&date(x.end)&&money(x.price)))return false;
  if(!s.payments.every(x=>ids.has(x.studentId)&&date(x.day)&&money(x.amount)&&x.amount>0&&['Naqd','Karta','O‘tkazma'].includes(x.method)))return false;
  if(!s.attendance.every(x=>ids.has(x.studentId)&&date(x.day)&&['Keldi','Kelmadi'].includes(x.status)))return false;
