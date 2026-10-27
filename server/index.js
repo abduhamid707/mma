@@ -82,7 +82,8 @@ app.put('/api/state',auth,async(req,res,next)=>{try{
 app.get('/api/backup',auth,async(_req,res,next)=>{try{const r=await pool.query('SELECT content FROM mma_state WHERE id=1');res.setHeader('Content-Disposition','attachment; filename="mma-backup.json"');res.setHeader('Cache-Control','no-store');res.type('json').send(JSON.stringify(r.rows[0].content,null,2))}catch(e){next(e)}});
 app.get('/api/health',async(_req,res)=>{try{await pool.query('SELECT 1');res.json({ok:true})}catch{res.status(503).json({ok:false})}});
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
-app.use(express.static(root,{index:false,dotfiles:'deny',extensions:false,etag:true}));
+for(const name of ['app.js','style.css'])app.get('/'+name,(_req,res)=>res.sendFile(path.join(root,name)));
+app.get('/favicon.ico',(_req,res)=>res.status(204).end());
 app.get('/',(_req,res)=>res.sendFile(path.join(root,'index.html')));
 app.use('/api',(_req,res)=>res.status(404).json({error:'Not found'}));
 app.use((err,_req,res,_next)=>{console.error(err);res.status(500).json({error:'Server xatosi'})});
